@@ -2,7 +2,6 @@
 
 # dependencies
 /node_modules
-../pg-api/node_modules
 
 # testing
 /coverage
