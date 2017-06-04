@@ -14,7 +14,7 @@ class App extends Component {
 componentDidMount(){
   let that = this;
 //console.log('has mounted');
-fetch('http://localhost:3000/api/companies')
+fetch('http://localhost:3111/api/companies')
 .then(function (response){
   response.json()
   .then(function(data){
@@ -24,6 +24,29 @@ that.setState({
   })
 })
 }
+
+removeCompany(order_id){
+  var that = this;
+let companies = this.state.companies;
+let company = companies.find(function(company){
+  return company.order_id === order_id
+});
+let request = new Request('http://localhost:3111/api/remove/' + order_id,{
+method: 'DELETE'
+});
+fetch(request)
+.then(function(response){
+  companies.splice(companies.indexOf(company),1);
+  that.setState(
+    { companies: companies}
+  )
+  response.json()
+  .then(function(data){
+    console.log(data)
+  })
+})
+}
+
 addCompany(event){
   var that = this;
   event.preventDefault();
@@ -34,7 +57,7 @@ let companyData = {
   order_id: Math.random().toFixed(4)
 };
 
-let request = new Request('http://localhost:3000/api/new-company',{
+let request = new Request('http://localhost:3111/api/new-company',{
   method:'POST',
   headers: new Headers({'Content-Type': 'application/json'}),
   body: JSON.stringify(companyData)
@@ -73,7 +96,8 @@ fetch(request)
       </form>
 <ul>
   {companies.map(company => 
-  <li key={company.order_id}>{company.company_name} {company.customer_address} {company.ordered_item}</li>)}
+  <li key={company.order_id}>{company.company_name} {company.customer_address} {company.ordered_item}
+    <button onClick={this.removeCompany.bind(this, company.order_id)}>Remove</button></li>)}
 </ul>
       </div>
     );

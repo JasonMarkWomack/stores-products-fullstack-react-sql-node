@@ -1,9 +1,9 @@
 let express = require('express');
 let bodyParser = require('body-parser');
 let morgan = require('morgan');
-let pg = require('pg')
-const PORT = 3000;
-let app = express();
+let pg = require('pg');
+let cors = require('cors');
+const PORT = 3111;
 let pool = new pg.Pool({
     port: 5432,
     password: '',
@@ -13,8 +13,9 @@ let pool = new pg.Pool({
     user: 'admin'
 });
 
+let app = express();
 
-
+app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
@@ -25,6 +26,30 @@ app.use(function(request, response, next) {
   response.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   next();
 });
+
+
+app.delete('/api/remove/:order_id', function(request, response){
+    var order_id = request.params.order_id;
+    pool.connect(function(err,db,done){
+        if(err){
+            return response.status(400).send(err)
+        }
+        else{
+            db.query('DELETE FROM  ops WHERE order_id = $1', [Number(order_id)],
+            
+            function(err, result){
+
+                done();
+                                if(err){
+                    return response.status(400).send(err)
+                } else {
+                    return response.status(200).send({message: 'success in deleting'})
+                }
+            })
+        }
+    })
+})
+
 
 app.get('/api/companies', function(request,response){
     pool.connect(function (err, db, done){
@@ -63,7 +88,7 @@ return response.status(400).send(err);
 
             }else{
                 console.log('INSERTED!');
-                db.end();
+               
 
             }
         });
